@@ -10,24 +10,13 @@ class App extends Component {
     }
   }
   componentDidMount () {
-    let keydownValue = Rx.Observable.fromEvent(ReactDOM.findDOMNode(this.refs.t),'keydown').delay(0).map(e => e.key.toUpperCase())
-    keydownValue.filter(value => value.length === 1 && value.match(/[0-9A-F]/))
-      .subscribe(value => {
-        this.insertValue(value)
-        this.setColon()
-        this.setDomValue()
-      })
-    keydownValue.filter(value => value === 'BACKSPACE')
-      .subscribe(() => {
-        this.deleteValue()
-        this.setColon()
-        this.setDomValue()
-      })
-    keydownValue.filter(value => value.length === 1 && !value.match(/[0-9A-F]/))
-     .subscribe(value => this.setDomValue())
+    let keydownValue = Rx.Observable.fromEvent(ReactDOM.findDOMNode(this.refs.t),'keydown').map(e => e.key.toUpperCase())
+    keydownValue.filter(value => value.length === 1 && value.match(/[0-9A-F]/)).subscribe(value => this.insertValue(value))
+    keydownValue.filter(value => value === 'BACKSPACE').subscribe(() => this.deleteValue())
+    keydownValue.subscribe(value => this.setDomValue())
+    keydownValue.subscribe(value => this.setColon())
   }
 
-  forbidLeft = e => e.keyCode === 37 && e.preventDefault()
   insertValue = value => this.state.value.length !== 17 && this.setState({value: this.state.value + value})
   deleteValue = value => this.isLastColon() ? this.setState({value: this.state.value.slice(0, -2)}) : this.setState({value: this.state.value.slice(0, -1)})
   setDomValue = () => ReactDOM.findDOMNode(this.refs.t).value = this.state.value
@@ -37,7 +26,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <input type="text"  onKeyDown={this.forbidLeft} ref="t"/>
+        <input type="text"  onKeyDown={e => e.preventDefault()} ref="t"/>
       </div>
     );
   }

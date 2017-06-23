@@ -34,10 +34,7 @@ class App extends Component {
     this.sd.dispose()
     this.se.dispose()
   }
-  handleE = e => {
-    e.preventDefault()
-    this.keydownValue.onNext(e)
-  }
+  handleE = e => {e.preventDefault();this.keydownValue.onNext(e)}
   async insertValue (value) {
     if (this.state.value.length !== 17) {
       await this.setStateAsync({...this.state,value: this.state.value.slice(0, this.state.pos) + value + this.state.value.slice(this.state.pos, this.state.value.length)})
@@ -52,7 +49,7 @@ class App extends Component {
       await this.setStateAsync({...this.state, value: this.state.value.slice(0, this.state.pos - 1) + this.state.value.slice(this.state.pos, this.state.value.length)})
       await this.setPos(this.state.pos - 1)
       if (this.isLastColon()) {
-        this.deleteValue()
+        await this.deleteValue()
       }
     }
   }
@@ -61,17 +58,14 @@ class App extends Component {
       await this.insertValue(':')
     }
   }
-  async setPos (pos = this.state.value.length, cb) { await this.setStateAsync({...this.state, pos})}
+  async setPos (pos = this.state.value.length) { await this.setStateAsync({...this.state, pos})}
   moveLeft = () => this.state.pos > 0 && this.setState({...this.state, pos: this.state.pos - 1})
   moveRight = () => this.state.pos !== this.state.value.length && this.setState({...this.state, pos: this.state.pos + 1})
   goPos = () => ReactDOM.findDOMNode(this.refs.t).setSelectionRange(this.state.pos, this.state.pos)
   isNearColon = () => this.isLastColon() || this.state.value.charAt(this.state.pos ) === ':'
   isLastColon = () => this.state.value.charAt(this.state.pos - 1) === ':'
-  setStateAsync = state => {
-    return new Promise(resolve => {
-      this.setState(state,resolve)
-    })
-  }
+  setStateAsync = state => new Promise(resolve => this.setState(state,resolve))
+
   render() {
     return (
       <div className="App">

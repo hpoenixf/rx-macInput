@@ -13,26 +13,27 @@ class App extends Component {
   componentDidMount () {
     this.keydownValue = new Rx.Subject()
     let keydownValue = this.keydownValue.map(e => e.key.toUpperCase())
-    this.sa = keydownValue.filter(value => value.length === 1 && value.match(/[0-9A-F]/)).subscribe(async value => {
+    let multicasted = keydownValue.share()
+    this.sa = multicasted.filter(value => value.length === 1 && value.match(/[0-9A-F]/)).subscribe(async value => {
       await this.setColon('before')
       await this.insertValue(value)
       await this.setColon()
       this.goPos()
     })
-    this.sb = keydownValue.filter(value => value === 'BACKSPACE').subscribe(async () => {await this.deleteValue();this.goPos()})
-    this.sc = keydownValue.filter(value => value === 'ARROWLEFT').subscribe(() => this.moveLeft())
-    this.sd = keydownValue.filter(value => value === 'ARROWRIGHT').subscribe(() => this.moveRight())
-    this.se = keydownValue.subscribe(() => setTimeout(this.goPos, 0))
-    // this.sf = keydownValue.subscribe(value => {
+    this.sb = multicasted.filter(value => value === 'BACKSPACE').subscribe(async () => {await this.deleteValue();this.goPos()})
+    this.sc = multicasted.filter(value => value === 'ARROWLEFT').subscribe(() => this.moveLeft())
+    this.sd = multicasted.filter(value => value === 'ARROWRIGHT').subscribe(() => this.moveRight())
+    this.se = multicasted.subscribe(() => setTimeout(this.goPos, 0))
+    // this.sf = multicasted.subscribe(value => {
     //   console.log(value)
     // })
   }
   componentWillUnmount() {
-    this.sa.dispose()
-    this.sb.dispose()
-    this.sc.dispose()
-    this.sd.dispose()
-    this.se.dispose()
+    this.sa.unsubscribe()
+    this.sb.unsubscribe()
+    this.sc.unsubscribe()
+    this.sd.unsubscribe()
+    this.se.unsubscribe()
   }
   handleE = e => {e.preventDefault();this.keydownValue.onNext(e)}
   async insertValue (value) {

@@ -12,8 +12,7 @@ class App extends Component {
   }
   componentDidMount () {
     this.keydownValue = new Rx.Subject()
-    let keydownValue = this.keydownValue.map(e => e.key.toUpperCase())
-    let multicasted = keydownValue.share()
+    let multicasted = this.keydownValue.map(e => e.key.toUpperCase()).share()
     this.sa = multicasted.filter(value => value.length === 1 && value.match(/[0-9A-F]/)).subscribe(async value => {
       await this.setColon('before')
       await this.insertValue(value)
@@ -35,7 +34,6 @@ class App extends Component {
     this.sd.unsubscribe()
     this.se.unsubscribe()
   }
-  handleE = e => {e.preventDefault();this.keydownValue.onNext(e)}
   async insertValue (value) {
     if (this.state.value.length !== 17) {
       await this.setStateAsync({...this.state,value: this.state.value.slice(0, this.state.pos) + value + this.state.value.slice(this.state.pos, this.state.value.length)})
@@ -70,7 +68,11 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <input type="text" onKeyDown={this.handleE} value={this.state.value}  ref="t"/>
+        <input type="text"
+           onKeyDown={e => {e.preventDefault();this.keydownValue.onNext(e)}}
+           onClick={e => this.setState({...this.state, pos: this.refs.t.selectionStart})}
+           value={this.state.value}
+           ref="t"/>
       </div>
     );
   }
